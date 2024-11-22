@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        function checkLogin() {
+            const login = document.getElementById('login').value.trim();
+            const loginFeedback = document.getElementById('loginFeedback');
+
+            if (!login) {
+                loginFeedback.textContent = 'Логин не может быть пустым.';
+                loginFeedback.className = 'error';
+                return;
+            }
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `check_login.php?login=${encodeURIComponent(login)}`, true);
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+
+                    if (response.status === 'success') {
+                        loginFeedback.textContent = response.message;
+                        loginFeedback.className = 'success';
+                    } else {
+                        loginFeedback.textContent = response.message;
+                        loginFeedback.className = 'error';
+                    }
+                } else {
+                    loginFeedback.textContent = 'Ошибка соединения с сервером.';
+                    loginFeedback.className = 'error';
+                }
+            };
+
+            xhr.onerror = function () {
+                loginFeedback.textContent = 'Ошибка AJAX-запроса.';
+                loginFeedback.className = 'error';
+            };
+
+            xhr.send();
+        }
+
+        function registerUser(event) {
+            event.preventDefault();
+
+            const login = document.getElementById('login').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const feedback = document.getElementById('feedback');
+
+            if (!login || !password) {
+                feedback.textContent = 'Все поля обязательны для заполнения.';
+                feedback.className = 'error';
+                return;
+            }
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'register.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+
+                    if (response.status === 'success') {
+                        feedback.textContent = response.message;
+                        feedback.className = 'success';
+                    } else {
+                        feedback.textContent = response.message;
+                        feedback.className = 'error';
+                    }
+                } else {
+                    feedback.textContent = 'Ошибка соединения с сервером.';
+                    feedback.className = 'error';
+                }
+            };
+
+            xhr.onerror = function () {
+                feedback.textContent = 'Ошибка AJAX-запроса.';
+                feedback.className = 'error';
+            };
+
+            xhr.send(`login=${encodeURIComponent(login)}&password=${encodeURIComponent(password)}`);
+        }
+    </script>
+</head>
+<body>
+<div class="container">
+    <h1>Регистрация</h1>
+    <form onsubmit="registerUser(event)">
+        <label for="login">Логин:</label>
+        <input type="text" id="login" name="login" oninput="checkLogin()" required>
+        <p id="loginFeedback"></p>
+
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="submit">Зарегистрироваться</button>
+    </form>
+    <p id="feedback"></p>
+</div>
+</body>
+</html>
